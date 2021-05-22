@@ -156,25 +156,28 @@ function onOpenModal(evt) {
     return;
   }
 
-  galleryItems.forEach((item) => {
-    if (evt.target.alt === item.description) {
-      refs.images.src = `${item.original}`;
-      refs.images.alt = `${item.description}`;
-    }
-
-    refs.images.addEventListener('load', onImgLoaded, {once: true})
-  })
-
+  refs.images.src = evt.target.dataset.source;
+  refs.images.alt = evt.target.alt;
+  refs.images.addEventListener('load', onImgLoaded, {once: true})
+  
   function onImgLoaded() {
-    window.addEventListener('keydown', onEscKeyDown)
+    window.addEventListener('keydown', onEscKeyDown);
+    window.addEventListener('keydown', onRightPress);
+    window.addEventListener('keydown', onLeftPress);
+
     refs.modal.classList.add('is-open');
   }
 }
 
 
 function onCloseModal() {
-  window.removeEventListener('keydown', onEscKeyDown)
+  window.removeEventListener('keydown', onEscKeyDown);
+  window.removeEventListener('keydown', onRightPress);
+  window.removeEventListener('keydown', onLeftPress);
+
   refs.modal.classList.remove('is-open');
+  refs.images.src = '';
+  refs.images.alt = '';
 }
 
 
@@ -188,5 +191,45 @@ function onEscKeyDown(evt) {
 function onBackdrop(evt) {
   if (evt.currentTarget === evt.target) {
     onCloseModal()
+  }
+}
+
+
+function onRightPress(evt) {
+  if (evt.code === 'ArrowRight') {
+    const activeImage = galleryItems.findIndex(
+      items => items.original === refs.images.src,
+    );
+
+    let index = activeImage ? activeImage : 0;
+
+    if (index < galleryItems.length - 1) {
+      index += 1;
+    } else {
+      index = 0;
+  }
+  
+    refs.images.src = galleryItems[index].original;
+    refs.images.alt = galleryItems[index].alt;
+  } 
+}
+
+
+function onLeftPress(evt) {
+  if (evt.code === 'ArrowLeft') {
+      const activeImage = galleryItems.findIndex(
+      items => items.original === refs.images.src,
+    );
+
+    let index = activeImage ? activeImage : galleryItems.length - 1;
+
+    if (index > 0) {
+      index -= 1;
+    } else {
+      index = galleryItems.length - 1;
+  }
+  
+    refs.images.src = galleryItems[index].original;
+    refs.images.alt = galleryItems[index].alt;
   }
 }
